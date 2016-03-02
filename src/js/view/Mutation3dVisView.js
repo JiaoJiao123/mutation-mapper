@@ -127,60 +127,92 @@ var Mutation3dVisView = Backbone.View.extend({
 		// init buttons
 		self._initButtons();
 
+		// init3dPanel
+		self._3dPanel = self._init3dPanel();
+		self.hideView();
+
 		// make the main container draggable
-		container3d.draggable({
-			handle: ".mutation-3d-info-title",
-//			start: function(event, ui) {
-//				// fix the width to prevent resize during drag
-//				var width = container3d.css("width");
-//				container3d.css("width", width);
-//			},
-			stop: function(event, ui) {
-				var top = parseInt(container3d.css("top"));
-				var left = parseInt(container3d.css("left"));
-				//var width = parseInt(container3d.css("width"));
-
-				// if the panel goes beyond the visible area, get it back!
-
-				if (top < 0)
-				{
-					container3d.css("top", 0);
-				}
-
-				//if (left < -width)
-				if (left < 0)
-				{
-					container3d.css("left", 0);
-				}
-
-				// TODO user can still take the panel out by dragging it to the bottom or right
-			}
-		});
+//		container3d.draggable({
+//			handle: ".mutation-3d-info-title",
+////			start: function(event, ui) {
+////				// fix the width to prevent resize during drag
+////				var width = container3d.css("width");
+////				container3d.css("width", width);
+////			},
+//			stop: function(event, ui) {
+//				var top = parseInt(container3d.css("top"));
+//				var left = parseInt(container3d.css("left"));
+//				//var width = parseInt(container3d.css("width"));
+//
+//				// if the panel goes beyond the visible area, get it back!
+//
+//				if (top < 0)
+//				{
+//					container3d.css("top", 0);
+//				}
+//
+//				//if (left < -width)
+//				if (left < 0)
+//				{
+//					container3d.css("left", 0);
+//				}
+//
+//				// TODO user can still take the panel out by dragging it to the bottom or right
+//			}
+//		});
 
 		//TODO something like this might be safer for "alsoResize" option:
 		// container3d.find(".mutation-3d-vis-container,.mutation-3d-vis-container div:eq(0)")
 
-		// make the container resizable
-		container3d.resizable({
-			alsoResize: ".mutation-3d-vis-container,.mutation-3d-vis-container div:eq(0)",
-			handles: "sw, s, w",
-			minWidth: 400,
-			minHeight: 300,
-			start: function(event, ui) {
-				// a workaround to properly redraw the 3d-info area
-				container3d.find(".mutation-3d-vis-help-content").css("width", "auto");
+		//// make the container resizable
+		//container3d.resizable({
+		//	alsoResize: ".mutation-3d-vis-container,.mutation-3d-vis-container div:eq(0)",
+		//	handles: "sw, s, w",
+		//	minWidth: 400,
+		//	minHeight: 300,
+		//	start: function(event, ui) {
+		//		// a workaround to properly redraw the 3d-info area
+		//		container3d.find(".mutation-3d-vis-help-content").css("width", "auto");
+		//
+		//		// a workaround to prevent position to be set to absolute
+		//		container3d.css("position", "fixed");
+		//	},
+		//	stop: function(event, ui) {
+		//		// a workaround to properly redraw the 3d-info area
+		//		container3d.css("height", "auto");
+		//
+		//		// a workaround to prevent position to be set to absolute
+		//		container3d.css("position", "fixed");
+		//	}
+		//});
+	},
+	_init3dPanel: function()
+	{
+		var self = this;
+		var container3d = self.$el;
 
-				// a workaround to prevent position to be set to absolute
-				container3d.css("position", "fixed");
+		var containerPanel = $.jsPanel({
+			title: "3D Structure",
+			position: "top right",
+			size: {
+				width: 450,
+				height: "auto"
 			},
-			stop: function(event, ui) {
-				// a workaround to properly redraw the 3d-info area
-				container3d.css("height", "auto");
-
-				// a workaround to prevent position to be set to absolute
-				container3d.css("position", "fixed");
+			resizable: {
+				alsoResize: ".mutation-3d-vis-container,.mutation-3d-vis-toolbar",
+				handles: "sw, s, w"
+			},
+			onbeforeclose: function() {
+				// hide the view
+				self.hideView();
+				// never actually close
+				return false;
 			}
 		});
+
+		containerPanel.content.append(container3d);
+
+		return containerPanel;
 	},
 	/**
 	 * Initializes the control buttons.
@@ -720,9 +752,14 @@ var Mutation3dVisView = Backbone.View.extend({
 		var self = this;
 		var mut3dVis = self.options.mut3dVis;
 
-		if (mut3dVis)
+		//if (mut3dVis)
+		//{
+		//	mut3dVis.minimize();
+		//}
+
+		if (self._3dPanel)
 		{
-			mut3dVis.minimize();
+			self._3dPanel.minimize();
 		}
 	},
 	/**
@@ -733,9 +770,20 @@ var Mutation3dVisView = Backbone.View.extend({
 		var self = this;
 		var mut3dVis = self.options.mut3dVis;
 
-		if (mut3dVis)
+		//if (mut3dVis)
+		//{
+		//	mut3dVis.maximize();
+		//}
+
+		if (self._3dPanel)
 		{
-			mut3dVis.maximize();
+			$(".jsPanel").show();
+
+			if (self._3dPanel.option.panelstatus === "smallified")
+			{
+				self._3dPanel.smallify();
+			}
+			//self._3dPanel.maximize();
 		}
 	},
 	/**
@@ -744,9 +792,15 @@ var Mutation3dVisView = Backbone.View.extend({
 	resetPanelPosition: function()
 	{
 		var self = this;
-		var container3d = self.$el;
 
-		container3d.css({"left": "", position: "", "top": 0});
+		//var container3d = self.$el;
+		//
+		//container3d.css({"left": "", position: "", "top": 0});
+
+		if (self._3dPanel)
+		{
+			self._3dPanel.reposition("top right");
+		}
 	},
 	/**
 	 * Hides the 3D visualizer panel.
@@ -757,9 +811,14 @@ var Mutation3dVisView = Backbone.View.extend({
 		var mut3dVis = self.options.mut3dVis;
 
 		// hide the vis pane
-		if (mut3dVis != null)
+		//if (mut3dVis != null)
+		//{
+		//	mut3dVis.hide();
+		//}
+
+		if (self._3dPanel)
 		{
-			mut3dVis.hide();
+			$(".jsPanel").hide();
 		}
 
 		// trigger corresponding event

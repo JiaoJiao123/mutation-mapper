@@ -163,8 +163,8 @@ function Mutation3dController(mutationDetailsView, mainMutationView,
 
 		if (mut3dVisView != null)
 		{
-			mut3dVisView.resetPanelPosition();
 			mut3dVisView.maximizeView();
+			mut3dVisView.resetPanelPosition();
 		}
 	}
 
